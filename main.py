@@ -16,6 +16,7 @@ class zdaye(object):
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
         }
         self.url = "http://ip.zdaye.com/dayProxy.html"
+    
     def zdylist(self):
         print 'process zdaye.com'
         request = urllib2.Request(self.url, headers=self.headers)
@@ -29,13 +30,35 @@ class zdaye(object):
     def proxyre(self, url):
         request = urllib2.Request(url, headers=self.headers)
         pagescode = urllib2.urlopen(request).read()
-        soup = BeautifulSoup(pagescode, "html.parser")
         ipre = r"(((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?):\d*)"
         result = re.findall(ipre, pagescode)
         proxydb = sqlite()
         for a in result:
             print str(a[0]).split(':')[0], str(a[0]).split(':')[1]
             proxydb.insertdb(str(a[0]).split(':')[0], str(a[0]).split(':')[1])
+
+
+class goubanjia(object):
+    def __init__(self):
+        self.headers = {
+            "Referer": "http://www.goubanjia.com/free/index.shtml",
+            "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+        }
+        self.url = "http://www.goubanjia.com/free/index.shtml"
+    
+    def proxyre(self):
+        for pagenumber in (1, 51):
+            url = "http://www.goubanjia.com/free/index" + str(pagenumber) + ".shtml"
+            request = urllib2.Request(url, headers=self.headers)
+            pagescode = urllib2.urlopen(request).read()
+            print pagescode
+            ipre = r"(((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?):\d*)"
+            result = re.findall(ipre, pagescode)
+            proxydb = sqlite()
+            for a in result:
+                print str(a[0]).split(':')[0], str(a[0]).split(':')[1]
+                #proxydb.insertdb(str(a[0]).split(':')[0], str(a[0]).split(':')[1])
 
 
 class sqlite(object):
@@ -49,6 +72,9 @@ class sqlite(object):
         )
         self.db.commit()
 
+
 if __name__ == "__main__":
-    zdayefree = zdaye()
-    zdayefree.zdylist()
+    # zdayefree = zdaye()
+    # zdayefree.zdylist()
+    goubanjiafree = goubanjia()
+    goubanjiafree.proxyre()
