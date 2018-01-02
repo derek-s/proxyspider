@@ -151,11 +151,10 @@ class xici(object):
 
     def __init__(self):
         self.headers = {
-            "Referer": "https://www.kuaidaili.com/free/",
+            "Referer": "http://www.xicidaili.com",
             "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
         }
-        self.url = "https://www.kuaidaili.com/free/"
     
     def wtproxyre(self):
         print "process xicidaili"
@@ -175,6 +174,31 @@ class xici(object):
                 proxydb.insertdb(ipaddr, port)
 
 
+# 66cn
+class cn66(object):
+    def __init__(self):
+        self.headers = {
+            "Referer": "http://www.66ip.cn",
+            "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+        }
+
+    def proxyre(self):
+        print "process 66ip.cn"
+        proxydb = sqlite()
+        url = "http://www.66ip.cn/nmtq.php?getnum=800"
+        request = urllib2.Request(url, headers=self.headers)
+        pagescode = urllib2.urlopen(request).read()
+        ipre = r"(((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?):\d*)"
+        result = re.findall(ipre, pagescode)
+        proxydb = sqlite()
+        for a in result:
+            ipaddr = str(a[0]).split(':')[0]
+            port = str(a[0]).split(':')[1]
+            print ipaddr, port
+            proxydb.insertdb(ipaddr, port)
+
+
 class sqlite(object):
     def __init__(self):
         self.db = sqlite3.connect("pool.db")
@@ -182,17 +206,37 @@ class sqlite(object):
     
     def insertdb(self, ip, port):
         self.c.execute(
-            "insert into proxy(IP,Port) values(?,?)", (ip, port)
+            'select IP from proxy where IP = ?', (ip,)
         )
-        self.db.commit()
+        result = self.c.fetchone()
+        if result is not None:
+            if result[0] == ip:
+                print "IP already exist"
+            else:
+                self.c.execute(
+                    "insert into proxy(IP,Port) values(?,?)", (ip, port)
+                )
+                self.db.commit()
+        else:
+            self.c.execute(
+                    "insert into proxy(IP,Port) values(?,?)", (ip, port)
+                )
+            self.db.commit()
+
+
+def spidermain():
+    zdayefree = zdaye()
+    zdayefree.zdylist()
+    goubanjiafree = goubanjia()
+    goubanjiafree.proxyre()
+    kdaili = kuaidaili()
+    kdaili.inhaproxyre()
+    xicispider = xici()
+    xicispider.wtproxyre()
+    cn66spdier = cn66()
+    cn66spdier.proxyre()
+    print "spider done"
 
 
 if __name__ == "__main__":
-    # zdayefree = zdaye()
-    # zdayefree.zdylist()
-    # goubanjiafree = goubanjia()
-    # goubanjiafree.proxyre()
-    # kdaili = kuaidaili()
-    # kdaili.inhaproxyre()
-    xici = xici()
-    xici.wtproxyre()
+    spidermain()
