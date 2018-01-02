@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 import os
 import time
 import sqlite3
+import requests
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.action_chains import ActionChains
@@ -27,13 +28,19 @@ class zdaye(object):
     
     def zdylist(self):
         print 'process zdaye.com'
-        request = urllib2.Request(self.url, headers=self.headers)
-        pagescode = urllib2.urlopen(request).read()
-        soup = BeautifulSoup(pagescode, "html.parser")
-        proxyhtml = soup.select("div.title > a")
-        for href in proxyhtml:
-            zdyurl = "http://ip.zdaye.com" + href.get('href')
-            self.proxyre(zdyurl)
+        for page in range(1, 3):
+            if page == 1:
+                url = self.url
+            else:
+                url = "http://ip.zdaye.com/dayProxy/" + str(page) + ".html"
+            request = urllib2.Request(url, headers=self.headers)
+            pagescode = urllib2.urlopen(request).read()
+            soup = BeautifulSoup(pagescode, "html.parser")
+            proxyhtml = soup.select("div.title > a")
+            for href in proxyhtml:
+                zdyurl = "http://ip.zdaye.com" + href.get('href')
+                self.proxyre(zdyurl)
+                time.sleep(2)
 
     def proxyre(self, url):
         request = urllib2.Request(url, headers=self.headers)
@@ -107,15 +114,17 @@ class kuaidaili(object):
             "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
         }
-        self.url = "https://www.kuaidaili.com/free/"
 
     def inhaproxyre(self):
         print "process kuaidaili.com"
         proxydb = sqlite()
         for page in range(1, 50):
             url = "https://www.kuaidaili.com/free/inha/" + str(page)
-            request = urllib2.Request(url, headers=self.headers)
-            pagescode = urllib2.urlopen(request).read()
+            try:
+                reqresult = requests.get(url, headers=self.headers, verify=False)
+            except:
+                pass
+            pagescode = reqresult.text
             soup = BeautifulSoup(pagescode, "html.parser")
             iplist = soup.select('div#list > table > tbody > tr > td[data-title="IP"]')
             portlist = soup.select('div#list > table > tbody > tr > td[data-title="PORT"]')
@@ -126,14 +135,18 @@ class kuaidaili(object):
                 print ipaddr, port
                 proxydb.insertdb(ipaddr, port)
             time.sleep(2)
+            
     
     def intrproxyre(self):
         print "process kuaidaili.com"
         proxydb = sqlite()
         for page in range(1, 50):
             url = "https://www.kuaidaili.com/free/intr/" + str(page)
-            request = urllib2.Request(url, headers=self.headers)
-            pagescode = urllib2.urlopen(request).read()
+            try:
+                reqresult = requests.get(url, headers=self.headers, verify=False)
+            except:
+                pass
+            pagescode = reqresult.text
             soup = BeautifulSoup(pagescode, "html.parser")
             iplist = soup.select('div#list > table > tbody > tr > td[data-title="IP"]')
             portlist = soup.select('div#list > table > tbody > tr > td[data-title="PORT"]')
@@ -199,12 +212,38 @@ class cn66(object):
             proxydb.insertdb(ipaddr, port)
 
 
+# 89ip.cn
+class ip89cn(object):
+    def __init__(self):
+        self.headers = {
+            "Referer": "http://www.89ip.cn",
+            "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+        }
+        self.url = r"http://www.89ip.cn/tiqv.php?sxb=&tqsl=10000&ports=&ktip=&xl=on&submit=%CC%E1++%C8%A1"
+    
+    def proxyre(self):
+        request = urllib2.Request(self.url, headers=self.headers)
+        pagescode = urllib2.urlopen(request).read()
+        ipre = r"(((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?):\d*)"
+        result = re.findall(ipre, pagescode)
+        proxydb = sqlite()
+        for a in result:
+            ipaddr = str(a[0]).split(':')[0]
+            port = str(a[0]).split(':')[1]
+            print ipaddr, port
+            proxydb.insertdb(ipaddr, port)
+
+
+# 数据库
 class sqlite(object):
     def __init__(self):
         self.db = sqlite3.connect("pool.db")
         self.c = self.db.cursor()
     
     def insertdb(self, ip, port):
+        #OP, SOP = 0
+        PCOL = ""
         self.c.execute(
             'select IP from proxy where IP = ?', (ip,)
         )
@@ -214,15 +253,108 @@ class sqlite(object):
                 print "IP already exist"
             else:
                 self.c.execute(
-                    "insert into proxy(IP,Port) values(?,?)", (ip, port)
+                    "insert into proxy(IP,Port,OnlinePoint,HTTP,SOPoint,HTTPS) values(?,?,?,?,?,?)", (ip, port, 0, PCOL, 0, PCOL)
                 )
                 self.db.commit()
         else:
             self.c.execute(
-                    "insert into proxy(IP,Port) values(?,?)", (ip, port)
+                    "insert into proxy(IP,Port,OnlinePoint,HTTP,SOPoint,HTTPS) values(?,?,?,?,?,?)", (ip, port, 0, PCOL, 0, PCOL)
                 )
             self.db.commit()
 
+    def allip(self):
+        self.c.execute(
+            "select * from proxy"
+        )
+        return self.c.fetchall()
+
+    def closedb(self):
+        self.c.close()
+
+    def uphttppoint(self, id, point):
+        self.c.execute(
+            "UPDATE proxy SET OnlinePoint=? where ID=?", (point, id)
+        )
+        self.db.commit()
+    
+    def uphttpspoint(self, id, point):
+        self.c.execute(
+            "UPDATE proxy SET SOPoint=? where ID=?", (point, id)
+        )
+        self.db.commit()
+
+    def point(self, id):
+        self.c.execute(
+            "select OnlinePoint from proxy where ID=?", (int(id),)
+        )
+        return self.c.fetchone()
+
+    def protocol(self, id, pcol):
+        if pcol == "HTTP":
+            self.c.execute(
+                "UPDATE proxy SET HTTP=? where ID=?", (pcol, id)
+            )
+        elif pcol == "HTTPS":
+            self.c.execute(
+                "UPDATE proxy SET HTTPS=? where ID=?", (pcol, id)
+            )
+        self.db.commit()
+
+
+class proxytest(object):
+    def __init__(self):
+        self.headers = {
+            "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+        }
+        self.urlhttps = "https://www.baidu.com/"
+        self.urlhttp = "http://bj.ganji.com/"
+    
+    def ip_list(self):
+        proxydb = sqlite()
+        ipportlist = proxydb.allip()
+        proxydb.closedb()
+        self.test(ipportlist)
+    
+    def test(self, iplist):
+        proxydb = sqlite()
+        for info in iplist:
+            ipid = info[0]
+            ipaddr = info[1]
+            port = info[2]
+            proxyip = str(ipaddr)+":"+str(port)
+            httpprox = {
+                "http": proxyip
+            }
+            httpsprox = {
+                "https": proxyip
+            }
+            try:
+                print 'HTTP tesing: ' + proxyip
+                r = requests.get(self.urlhttp, proxies=httpprox, timeout=3)
+                code = r.status_code
+                if code == 200:
+                    print code
+                    point = proxydb.point(ipid)
+                    proxydb.uphttppoint(ipid, str(int(point[0])+1))
+                    proxydb.protocol(ipid, "HTTP")
+            except Exception as e:
+                print "Not Support HTTP"
+                point = proxydb.point(ipid)
+                proxydb.uphttppoint(ipid, str(int(point[0])-1))
+            try:
+                print 'HTTPS tesing: ' + proxyip
+                r = requests.get(self.urlhttps, proxies=httpsprox, timeout=3)
+                code = r.status_code
+                print code
+                if code == 200:
+                    point = proxydb.point(ipid)
+                    proxydb.uphttpspoint(ipid, str(int(point[0])+1))
+                    proxydb.protocol(ipid, "HTTPS")
+            except Exception as e:
+                print "Not Support HTTPS"
+                point = proxydb.point(ipid)
+                proxydb.uphttppoint(ipid, str(int(point[0])-1))
 
 def spidermain():
     zdayefree = zdaye()
@@ -231,12 +363,22 @@ def spidermain():
     goubanjiafree.proxyre()
     kdaili = kuaidaili()
     kdaili.inhaproxyre()
+    kdaili.intrproxyre()
     xicispider = xici()
     xicispider.wtproxyre()
-    cn66spdier = cn66()
-    cn66spdier.proxyre()
+    cn66spider = cn66()
+    cn66spider.proxyre()
+    cn89spider = ip89cn()
+    cn89spider.proxyre()
     print "spider done"
 
 
+def proxytestmain():
+    test = proxytest()
+    test.ip_list()
+    
+
+
 if __name__ == "__main__":
-    spidermain()
+    #spidermain()
+    proxytestmain()
