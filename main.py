@@ -15,6 +15,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 
+# 站大爷
 class zdaye(object):
     def __init__(self):
         self.headers = {
@@ -45,6 +46,7 @@ class zdaye(object):
             proxydb.insertdb(str(a[0]).split(':')[0], str(a[0]).split(':')[1])
 
 
+#全网代理IP
 class goubanjia(object):
     def __init__(self):
         self.dcap = DesiredCapabilities.PHANTOMJS.copy()
@@ -68,7 +70,7 @@ class goubanjia(object):
         finally:
             pagesoup = BeautifulSoup(self.driver.page_source, "html.parser")
             maxpage = pagesoup.select("div.wp-pagenavi > a:nth-of-type(9)")[0].get_text()
-            for pagenumber in range(1, int(maxpage)):
+            for pagenumber in range(1, 50):
                 url = "http://www.goubanjia.com/free/index" + str(pagenumber) + ".shtml"
                 print url
                 self.driver.get(url)
@@ -97,6 +99,7 @@ class goubanjia(object):
             self.driver.quit()
 
 
+# 快代理
 class kuaidaili(object):
     def __init__(self):
         self.headers = {
@@ -141,7 +144,35 @@ class kuaidaili(object):
                 print ipaddr, port
                 proxydb.insertdb(ipaddr, port)
             time.sleep(2)
-            
+
+
+# xici代理    
+class xici(object):
+
+    def __init__(self):
+        self.headers = {
+            "Referer": "https://www.kuaidaili.com/free/",
+            "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+        }
+        self.url = "https://www.kuaidaili.com/free/"
+    
+    def wtproxyre(self):
+        print "process xicidaili"
+        proxydb = sqlite()
+        for page in range(1, 50):
+            url = "http://www.xicidaili.com/wt/" + str(page)
+            request = urllib2.Request(url, headers=self.headers)
+            pagescode = urllib2.urlopen(request).read()
+            soup = BeautifulSoup(pagescode, "html.parser")
+            iplist = soup.select("div#wrapper > div > table#ip_list > tr > td:nth-of-type(2)")
+            portlist = soup.select("div#wrapper > div > table#ip_list > tr > td:nth-of-type(3)")
+            lenlist = len(iplist)
+            for num in range(0, lenlist):
+                ipaddr = iplist[num].get_text()
+                port = portlist[num].get_text()
+                print ipaddr, port
+                proxydb.insertdb(ipaddr, port)
 
 
 class sqlite(object):
@@ -161,5 +192,7 @@ if __name__ == "__main__":
     # zdayefree.zdylist()
     # goubanjiafree = goubanjia()
     # goubanjiafree.proxyre()
-    kdaili = kuaidaili()
-    kdaili.inhaproxyre()
+    # kdaili = kuaidaili()
+    # kdaili.inhaproxyre()
+    xici = xici()
+    xici.wtproxyre()
