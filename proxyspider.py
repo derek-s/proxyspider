@@ -207,13 +207,41 @@ class ip89cn(object):
         for info in result:
             print info[0]
 
-class swei360():
+# ip3366
+class ip3366():
     def __init__(self):
         self.headers = {
-            "Referer": "http://www.swei360.com/free/",
+            "Referer": "http://www.ip3366.com/free/",
             "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
         }
+        self.url = "http://www.ip3366.net/free/?stype=1&page=1"
 
     def proxyre(self):
-        pass
+        getHtml = request()
+        for pagenumber in range(1, 6):
+            url = "http://www.ip3366.net/free/?stype=1&page=" + str(pagenumber)
+            pagescode = getHtml.r(url, self.headers)
+            soup = BeautifulSoup(pagescode, "html.parser")
+            iplist = soup.select('div#list > table > tbody > tr > td:nth-of-type(1)')
+            portlist = soup.select('div#list > table > tbody > tr > td:nth-of-type(2)')
+            for x in range(0, (len(iplist))):
+                print iplist[x].get_text(), portlist[x].get_text()
+
+class data5u():
+    def __init__(self):
+        self.headers = {
+            "Referer": "http://www.data5u.com",
+            "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+        }
+        self.url = "http://www.data5u.com/free/gngn/index.shtml"
+
+    def proxyre(self):
+        getHtml = request()
+        pagescode = getHtml.r(self.url, self.headers)
+        soup = BeautifulSoup(pagescode, "html.parser")
+        iplist = soup.select("div.wlist > ul > li > ul.l2 > span:nth-of-type(1) > li")
+        portlist = soup.select("div.wlist > ul > li > ul.l2 > span:nth-of-type(2) > li")
+        for x in range(0, (len(iplist))):
+            print iplist[x].get_text(), portlist[x].get_text()
