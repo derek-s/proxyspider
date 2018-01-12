@@ -33,7 +33,7 @@ class request():
 
 
 # 站大爷
-class zdaye(object):
+class zdaye():
     def __init__(self):
         self.headers = {
             "Referer": "http://ip.zdaye.com/dayProxy.html",
@@ -68,7 +68,7 @@ class zdaye(object):
 
 
 #全网代理IP
-class goubanjia(object):
+class goubanjia():
     def __init__(self):
         self.dcap = DesiredCapabilities.PHANTOMJS.copy()
         self.dcap['phantomjs.page.customHeaders.Referer'] = 'http://www.goubanjia.com/free/index.shtml'
@@ -118,7 +118,7 @@ class goubanjia(object):
 
 
 # 快代理
-class kuaidaili(object):
+class kuaidaili():
     def __init__(self):
         self.headers = {
             "Referer": "https://www.kuaidaili.com/free/",
@@ -144,7 +144,7 @@ class kuaidaili(object):
 
 
 # xici代理    
-class xici(object):
+class xici():
 
     def __init__(self):
         self.headers = {
@@ -170,7 +170,7 @@ class xici(object):
 
 
 # 66cn
-class cn66(object):
+class cn66():
     def __init__(self):
         self.headers = {
             "Referer": "http://www.66ip.cn",
@@ -190,7 +190,7 @@ class cn66(object):
 
 
 # 89ip.cn
-class ip89cn(object):
+class ip89cn():
     def __init__(self):
         self.headers = {
             "Referer": "http://www.89ip.cn",
@@ -228,6 +228,7 @@ class ip3366():
             for x in range(0, (len(iplist))):
                 print iplist[x].get_text(), portlist[x].get_text()
 
+#data5u
 class data5u():
     def __init__(self):
         self.headers = {
@@ -245,3 +246,65 @@ class data5u():
         portlist = soup.select("div.wlist > ul > li > ul.l2 > span:nth-of-type(2) > li")
         for x in range(0, (len(iplist))):
             print iplist[x].get_text(), portlist[x].get_text()
+
+#ip181
+class ip181com():
+    def __init__(self):
+        self.headers = {
+            "Referer": "https://www.baidu.com",
+            "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+        }
+        self.url = "http://www.ip181.com/"
+
+    def proxyre(self):
+        getHtml = request()
+        pagescode = getHtml.r(self.url, self.headers)
+        soup = BeautifulSoup(pagescode, "html.parser")
+        iplist = soup.select("div > table > tbody > tr > td:nth-of-type(1)")
+        portlist = soup.select("div > table > tbody > tr > td:nth-of-type(2)")
+        for x in range(0, len(iplist)):
+            print iplist[x].get_text(), portlist[x].get_text()
+
+#nttpsdaili
+class yaoyaodaili():
+    def __init__(self):
+        self.headers = {
+            "Referer": "http://www.httpsdaili.com",
+            "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+        }
+        self.url = "http://www.httpsdaili.com"
+
+    def proxyre(self):
+        getHtml = request()
+        for pagenumber in range(1, 6):
+            url = "http://www.httpsdaili.com/free.asp?page=" + str(pagenumber)
+            pagescode = getHtml.r(url, self.headers)
+            soup = BeautifulSoup(pagescode, "html.parser")
+            iplist = soup.select("div#list > table > tbody > tr > td:nth-of-type(1)")
+            portlist = soup.select("div#list > table > tbody > tr > td:nth-of-type(2)")
+            for x in range(0, len(iplist)):
+                print iplist[x].get_text(), portlist[x].get_text()
+
+
+#kxdaili.com
+class kaixindaili():
+    def __init__(self):
+        self.headers = {
+            "Referer": "http://www.kxdaili.com/dailiip/1/1.html#ip",
+            "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+        }
+        self.url = "http://www.kxdaili.com/dailiip/1/1.html#ip"
+
+    def proxyre(self):
+        getHtml = request()
+        for pagenumber in range(1, 10):
+            url = "http://www.kxdaili.com/dailiip/1/" + str(pagenumber) + ".html#ip"
+            pagescode = getHtml.r(url, self.headers)
+            soup = BeautifulSoup(pagescode, "html.parser")
+            iplist = soup.select("div > table > tbody > tr > td:nth-of-type(1)")
+            portlist = soup.select("div > table > tbody > tr > td:nth-of-type(2)")
+            for x in range(0, len(iplist)):
+                print iplist[x].get_text(), portlist[x].get_text()

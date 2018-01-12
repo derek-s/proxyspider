@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 from proxyspider import zdaye, goubanjia, kuaidaili, xici, cn66, ip89cn
-from proxyspider import ip3366, data5u
+from proxyspider import ip3366, data5u, ip181com, yaoyaodaili, kaixindaili
 
 
 def spidermain():
@@ -22,6 +22,12 @@ def spidermain():
     #ip36ydl.proxyre()
     #data5uc = data5u()
     #data5uc.proxyre()
+    #ip181 = ip181com()
+    #ip181.proxyre()
+    #yaoyao = yaoyaodaili()
+    #yaoyao.proxyre()
+    kxdl = kaixindaili()
+    kxdl.proxyre()
     print "spider done"
 
 
