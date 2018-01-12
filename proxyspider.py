@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 import os
 import time
 import requests
+import json
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.action_chains import ActionChains
@@ -308,3 +309,21 @@ class kaixindaili():
             portlist = soup.select("div > table > tbody > tr > td:nth-of-type(2)")
             for x in range(0, len(iplist)):
                 print iplist[x].get_text(), portlist[x].get_text()
+
+#xdaili.cn
+class xdailicn():
+    def __init__(self):
+        self.headers = {
+            "Referer": "http://www.xdaili.cn/freeproxy",
+            "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+        }
+        self.url = "http://www.xdaili.cn/ipagent//freeip/getFreeIps?page=1&rows=10"
+
+    def proxyre(self):
+        getHtml = request()
+        pagescode = getHtml.r(self.url, headers=self.headers)
+        data = json.loads(pagescode)
+        rows = data["RESULT"]["rows"]
+        for x in rows:
+            print x["ip"], x["port"]
