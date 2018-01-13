@@ -14,7 +14,9 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from model import sqlite
 
+db = sqlite()
 
 class request():
     def __init__(self):
@@ -65,7 +67,10 @@ class zdaye():
         ipre = r"(((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?):\d*)"
         result = re.findall(ipre, pagescode)
         for a in result:
-            print str(a[0]).split(':')[0], str(a[0]).split(':')[1]
+            ipaddr = str(a[0]).split(':')[0]
+            port = str(a[0]).split(':')[1]
+            print ipaddr, port
+            db.insertdb(ipaddr, port)
 
 
 #全网代理IP
@@ -113,6 +118,7 @@ class goubanjia():
                             ipaddr = ipport[0]
                             port = ipport[1]
                             print ipaddr, port
+                            db.insertdb(ipaddr, port)
                         else:
                             pass
             self.driver.quit()
@@ -141,6 +147,7 @@ class kuaidaili():
                 ipaddr = iplist[num].get_text()
                 port = portlist[num].get_text()
                 print ipaddr, port
+                db.insertdb(ipaddr, port)
             time.sleep(2)
 
 
@@ -168,6 +175,7 @@ class xici():
                 ipaddr = iplist[num].get_text()
                 port = portlist[num].get_text()
                 print ipaddr, port
+                db.insertdb(ipaddr, port)
 
 
 # 66cn
@@ -187,7 +195,10 @@ class cn66():
         ipre = r"(((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?):\d*)"
         result = re.findall(ipre, pagescode)
         for info in result:
-            print info[0]
+            ipaddr = str(info[0]).split(':')[0]
+            port = str(info[0]).split(':')[1]
+            print ipaddr, port
+            db.insertdb(ipaddr, port)
 
 
 # 89ip.cn
@@ -206,7 +217,10 @@ class ip89cn():
         ipre = r"(((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?):\d*)"
         result = re.findall(ipre, pagescode)
         for info in result:
-            print info[0]
+            ipaddr = str(info[0]).split(':')[0]
+            port = str(info[0]).split(':')[1]
+            print ipaddr, port
+            db.insertdb(ipaddr, port)
 
 # ip3366
 class ip3366():
@@ -227,7 +241,10 @@ class ip3366():
             iplist = soup.select('div#list > table > tbody > tr > td:nth-of-type(1)')
             portlist = soup.select('div#list > table > tbody > tr > td:nth-of-type(2)')
             for x in range(0, (len(iplist))):
-                print iplist[x].get_text(), portlist[x].get_text()
+                ipaddr = iplist[x].get_text()
+                port = portlist[x].get_text()
+                print ipaddr, port
+                db.insertdb(ipaddr, port)
 
 #data5u
 class data5u():
@@ -246,7 +263,10 @@ class data5u():
         iplist = soup.select("div.wlist > ul > li > ul.l2 > span:nth-of-type(1) > li")
         portlist = soup.select("div.wlist > ul > li > ul.l2 > span:nth-of-type(2) > li")
         for x in range(0, (len(iplist))):
-            print iplist[x].get_text(), portlist[x].get_text()
+            ipaddr = iplist[x].get_text()
+            port = portlist[x].get_text()
+            print ipaddr, port
+            db.insertdb(ipaddr, port)
 
 #ip181
 class ip181com():
@@ -265,7 +285,10 @@ class ip181com():
         iplist = soup.select("div > table > tbody > tr > td:nth-of-type(1)")
         portlist = soup.select("div > table > tbody > tr > td:nth-of-type(2)")
         for x in range(0, len(iplist)):
-            print iplist[x].get_text(), portlist[x].get_text()
+            ipaddr = iplist[x].get_text()
+            port = portlist[x].get_text()
+            print ipaddr, port
+            db.insertdb(ipaddr, port)
 
 #nttpsdaili
 class yaoyaodaili():
@@ -286,7 +309,10 @@ class yaoyaodaili():
             iplist = soup.select("div#list > table > tbody > tr > td:nth-of-type(1)")
             portlist = soup.select("div#list > table > tbody > tr > td:nth-of-type(2)")
             for x in range(0, len(iplist)):
-                print iplist[x].get_text(), portlist[x].get_text()
+                ipaddr = iplist[x].get_text()
+                port = portlist[x].get_text()
+                print ipaddr, port
+                db.insertdb(ipaddr, port)
 
 
 #kxdaili.com
@@ -308,7 +334,10 @@ class kaixindaili():
             iplist = soup.select("div > table > tbody > tr > td:nth-of-type(1)")
             portlist = soup.select("div > table > tbody > tr > td:nth-of-type(2)")
             for x in range(0, len(iplist)):
-                print iplist[x].get_text(), portlist[x].get_text()
+                ipaddr = iplist[x].get_text()
+                port = portlist[x].get_text()
+                print ipaddr, port
+                db.insertdb(ipaddr, port)
 
 #xdaili.cn
 class xdailicn():
@@ -326,4 +355,8 @@ class xdailicn():
         data = json.loads(pagescode)
         rows = data["RESULT"]["rows"]
         for x in rows:
-            print x["ip"], x["port"]
+            ipaddr = x["ip"]
+            port = x["port"]
+            print ipaddr, port
+            db.insertdb(ipaddr, port)
+
