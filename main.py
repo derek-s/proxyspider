@@ -3,7 +3,7 @@
 
 from proxyspider import zdaye, goubanjia, kuaidaili, xici, cn66, ip89cn
 from proxyspider import ip3366, data5u, ip181com, yaoyaodaili, kaixindaili, xdailicn
-
+from proxytest import proxytest
 
 def spidermain():
     zdayefree = zdaye()
@@ -32,6 +32,11 @@ def spidermain():
     xundaili.proxyre()
     print "spider done"
 
+def proxy_test():
+    test = proxytest()
+    test.http_test()
 
 if __name__ == "__main__":
-    spidermain()
+    #spidermain()
+    proxy_test()
+

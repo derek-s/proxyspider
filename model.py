@@ -29,9 +29,10 @@ class sqlite(object):
 
     def allip(self):
         self.c.execute(
-            "select * from proxy"
+            "select * from IP_Pool"
         )
         return self.c.fetchall()
+
 
     def closedb(self):
         self.c.close()

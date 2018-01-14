@@ -1,3 +1,11 @@
+# !/usr/bin/python
+# -*- coding:utf-8 -*-
+
+from model import sqlite
+import requests
+
+db = sqlite()
+
 class proxytest(object):
     def __init__(self):
         self.headers = {
@@ -7,48 +15,36 @@ class proxytest(object):
         self.urlhttps = "https://www.baidu.com/"
         self.urlhttp = "http://bj.ganji.com/"
     
-    def ip_list(self):
-        proxydb = sqlite()
-        ipportlist = proxydb.allip()
-        proxydb.closedb()
-        self.test(ipportlist)
-    
-    def test(self, iplist):
-        proxydb = sqlite()
-        for info in iplist:
-            ipid = info[0]
-            ipaddr = info[1]
-            port = info[2]
-            proxyip = str(ipaddr)+":"+str(port)
-            httpprox = {
-                "http": proxyip
-            }
-            httpsprox = {
-                "https": proxyip
+    def ip_pool_list(self):
+        # 获取IP池总表
+        ipportlist = db.allip()
+        return ipportlist
+
+    def anonymity_test(self, ip, proxy, protocol):
+        # 匿名检测
+        if protocol == "HTTP":
+            r = requests.get("http://ip.ddemo.xyz", headers=self.headers, proxies=proxy, timeout=10)
+            visit_ip = str(r.text).split(":")[0]
+            if visit_ip == ip:
+                return True
+
+    def http_test(self):
+        # http协议测试
+        print "Test Http protocol"
+        iplist = self.ip_pool_list()
+        for ipinfo in iplist:
+            proxy = ipinfo[1] + ":" + ipinfo[2]
+            print "tesing: " + proxy
+            proxy_setting = {
+                "http" : str("http://" + proxy)
             }
             try:
-                print 'HTTP tesing: ' + proxyip
-                r = requests.get(self.urlhttp, proxies=httpprox, timeout=3)
-                code = r.status_code
-                if code == 200:
-                    print code
-                    point = proxydb.point(ipid)
-                    proxydb.uphttppoint(ipid, str(int(point[0])+1))
-                    proxydb.protocol(ipid, "HTTP")
+                r = requests.get(self.urlhttp, headers=self.headers, proxies=proxy_setting, timeout=10)
+                statuscode = r.status_code
+                if statuscode == 200:
+                    print "True"
+                    if self.anonymity_test(ipinfo[1], proxy_setting, "HTTP"):
+                        pass
             except Exception as e:
-                print "Not Support HTTP"
-                point = proxydb.point(ipid)
-                proxydb.uphttppoint(ipid, str(int(point[0])-1))
-            try:
-                print 'HTTPS tesing: ' + proxyip
-                r = requests.get(self.urlhttps, proxies=httpsprox, timeout=3)
-                code = r.status_code
-                print code
-                if code == 200:
-                    point = proxydb.point(ipid)
-                    proxydb.uphttpspoint(ipid, str(int(point[0])+1))
-                    proxydb.protocol(ipid, "HTTPS")
-            except Exception as e:
-                print "Not Support HTTPS"
-                point = proxydb.point(ipid)
-                proxydb.uphttppoint(ipid, str(int(point[0])-1))
+                print e
+
