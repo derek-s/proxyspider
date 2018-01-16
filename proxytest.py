@@ -48,3 +48,22 @@ class proxytest(object):
             except Exception as e:
                 print e
 
+    def https_test(self):
+        # http协议测试
+        print "Test Http protocol"
+        iplist = self.ip_pool_list()
+        for ipinfo in iplist:
+            proxy = ipinfo[1] + ":" + ipinfo[2]
+            print "tesing: " + proxy
+            proxy_setting = {
+                "https" : str("https://" + proxy)
+            }
+            try:
+                r = requests.get(self.urlhttp, headers=self.headers, proxies=proxy_setting, timeout=10)
+                statuscode = r.status_code
+                if statuscode == 200:
+                    print "True"
+                    if self.anonymity_test(ipinfo[1], proxy_setting, "HTTP"):
+                        pass
+            except Exception as e:
+                print e
