@@ -3,7 +3,7 @@
 
 from model import sqlite
 import requests
-
+import threading
 db = sqlite()
 
 class proxytest(object):
@@ -14,6 +14,7 @@ class proxytest(object):
         }
         self.urlhttps = "https://www.baidu.com/"
         self.urlhttp = "http://bj.ganji.com/"
+        self.allip = self.ip_pool_list()
     
     def ip_pool_list(self):
         # 获取IP池总表
@@ -28,12 +29,14 @@ class proxytest(object):
             if visit_ip == ip:
                 return True
 
-    def http_test(self):
+    def http_test(self, start, end):
         # http协议测试
         print "Test Http protocol"
-        iplist = self.ip_pool_list()
-        for ipinfo in iplist:
-            proxy = ipinfo[1] + ":" + ipinfo[2]
+        print threading.current_thread().getName()
+        for i in self.allip[start:end]:
+            ip = str(i[1])
+            port = str(i[0])
+            proxy = ip + ":" + port
             print "tesing: " + proxy
             proxy_setting = {
                 "http" : str("http://" + proxy)
@@ -43,12 +46,12 @@ class proxytest(object):
                 statuscode = r.status_code
                 if statuscode == 200:
                     print "True"
-                    if self.anonymity_test(ipinfo[1], proxy_setting, "HTTP"):
-                        pass
+                    if self.anonymity_test(proxy, proxy_setting, "HTTP"):
+                            pass
             except Exception as e:
                 print e
 
-    def https_test(self):
+    def https_test(self, ip, proxy):
         # http协议测试
         print "Test Http protocol"
         iplist = self.ip_pool_list()
