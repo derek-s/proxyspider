@@ -32,12 +32,11 @@ class proxytest(object):
     def http_test(self, start, end):
         # http协议测试
         print "Test Http protocol"
-        print threading.current_thread().getName()
         for i in self.allip[start:end]:
             ip = str(i[1])
             port = str(i[0])
             proxy = ip + ":" + port
-            print "tesing: " + proxy
+            print threading.current_thread().getName() + " tesing: " + proxy
             proxy_setting = {
                 "http" : str("http://" + proxy)
             }
@@ -47,26 +46,29 @@ class proxytest(object):
                 if statuscode == 200:
                     print "True"
                     if self.anonymity_test(proxy, proxy_setting, "HTTP"):
-                            pass
+                        print "High"
             except Exception as e:
-                print e
+                #print e
+                print "error"
 
-    def https_test(self, ip, proxy):
+    def https_test(self, start, end):
         # http协议测试
-        print "Test Http protocol"
-        iplist = self.ip_pool_list()
-        for ipinfo in iplist:
-            proxy = ipinfo[1] + ":" + ipinfo[2]
-            print "tesing: " + proxy
+        print "Test Https protocol"
+        for i in self.allip[start:end]:
+            ip = str(i[1])
+            port = str(i[0])
+            proxy = ip + ":" + port
+            print threading.current_thread().getName() + " tesing: " + proxy
             proxy_setting = {
-                "https" : str("https://" + proxy)
+                "http": str("https://" + proxy)
             }
             try:
                 r = requests.get(self.urlhttp, headers=self.headers, proxies=proxy_setting, timeout=10)
                 statuscode = r.status_code
                 if statuscode == 200:
                     print "True"
-                    if self.anonymity_test(ipinfo[1], proxy_setting, "HTTP"):
-                        pass
+                    if self.anonymity_test(proxy, proxy_setting, "HTTP"):
+                        print "High"
             except Exception as e:
-                print e
+                # print e
+                print "error"
