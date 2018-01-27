@@ -33,6 +33,15 @@ class sqlite(object):
         )
         return self.c.fetchall()
 
+    def insert_Proxy(self, table, ip, port, point):
+        self.c.execute(
+            'insert into ?(IP,Port,Point) VALUES(?,?,?)', (table, ip, port, point)
+        )
+        self.db.commit()
 
+    def selete_point(self, table, ip, port):
+        self.c.execute(
+            'select Point from ? where ip = ? and port = ?', (table, ip, port,)
+        )
     def closedb(self):
         self.c.close()
