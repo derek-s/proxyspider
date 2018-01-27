@@ -47,6 +47,7 @@ class proxytest(object):
                     print "True"
                     if self.anonymity_test(proxy, proxy_setting, "HTTP"):
                         print "High"
+                        pass
             except Exception as e:
                 #print e
                 print "error"
