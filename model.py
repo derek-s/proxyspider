@@ -43,5 +43,14 @@ class sqlite(object):
         self.c.execute(
             'select Point from ? where ip = ? and port = ?', (table, ip, port,)
         )
+    def emtrypool(self):
+        self.db.execute(
+            "delete from IP_Pool"
+        )
+        self.db.execute(
+            'update sqlite_sequence set seq = 0 where name = "IP_Pool"'
+        )
+    def commit(self):
+        self.db.commit()
     def closedb(self):
         self.c.close()
