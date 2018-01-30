@@ -13,7 +13,7 @@ class proxytest(object):
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
         }
         self.urlhttps = "https://www.baidu.com/"
-        self.urlhttp = "http://bj.ganji.com/"
+        self.urlhttp = "http://www.ip138.com/"
         self.allip = self.ip_pool_list()
     
     def ip_pool_list(self):
@@ -47,10 +47,10 @@ class proxytest(object):
                     print "True"
                     if self.anonymity_test(proxy, proxy_setting, "HTTP"):
                         print "High"
-                        pass
+                        db.insert_Proxy("Proxy_HTTP", ip, port, 1)
             except Exception as e:
-                #print e
-                print "error"
+                # print e
+                print "Error"
 
     def https_test(self, start, end):
         # http协议测试
@@ -72,4 +72,4 @@ class proxytest(object):
                         print "High"
             except Exception as e:
                 # print e
-                print "error"
+                print "Error"
