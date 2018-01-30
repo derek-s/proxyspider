@@ -11,8 +11,10 @@ from model import sqlite
 
 parser = OptionParser()
 parser.add_option("-r", "--reload", action="store_true", dest="repp", help="empty ProxyPool table reload")
+parser.add_option("-s", "--spider", action="store_true", dest="sppool", help="spider ProxyPool")
+parser.add_option("-t", "--test", action="store_true", dest="test", help="Test Proxy")
 opts, args = parser.parse_args()
-#print opts.repp
+
 
 def spidermain():
     zdayefree = zdaye()
@@ -44,7 +46,7 @@ def spidermain():
 def proxy_test():
     test = proxytest()
     ip_list = test.ip_pool_list()
-    start_thread(24, ip_list)
+    start_thread(6, ip_list)
 
 
 def start_thread(num, iplist):
@@ -86,12 +88,16 @@ def start_thread(num, iplist):
 
 if __name__ == "__main__":
     db = sqlite()
-    if opts.repp == True:
+    if opts.repp:
         print "empty Proxy Pool table"
         db.emtrypool()
         db.commit()
         db.closedb()
         print "done"
-    #spidermain()
+    elif opts.sppool:
+        print "spider start"
+        spidermain()
+    elif opts.test:
+        proxy_test()
     #proxy_test()
 
