@@ -20,12 +20,12 @@ class sqlite(object):
                 self.c.execute(
                     "insert into IP_Pool(IP,Port) values(?,?)", (ip, port)
                 )
-                self.db.commit()
+                self.commit()
         else:
             self.c.execute(
                     "insert into IP_Pool(IP,Port) values(?,?)", (ip, port)
                 )
-            self.db.commit()
+            self.commit()
 
     def allip(self):
         self.c.execute(
@@ -37,7 +37,7 @@ class sqlite(object):
         self.c.execute(
             'insert into ?(IP,Port,Point) VALUES(?,?,?)', (table, ip, port, point)
         )
-        self.db.commit()
+        self.commit()
 
     def selete_point(self, table, ip, port):
         self.c.execute(
@@ -50,6 +50,7 @@ class sqlite(object):
         self.db.execute(
             'update sqlite_sequence set seq = 0 where name = "IP_Pool"'
         )
+        self.commit()
     def commit(self):
         self.db.commit()
     def closedb(self):
