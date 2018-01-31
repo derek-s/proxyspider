@@ -4,17 +4,20 @@
 from model import sqlite
 import requests
 import threading
+import re
 db = sqlite()
 
 class proxytest(object):
     def __init__(self):
         self.headers = {
             "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
+
         }
         self.urlhttps = "https://www.baidu.com/"
-        self.urlhttp = "http://www.ip138.com/"
+        self.urlhttp = "http://www.sina.com/"
         self.allip = self.ip_pool_list()
+        self.s = requests.session()
     
     def ip_pool_list(self):
         # 获取IP池总表
@@ -24,8 +27,10 @@ class proxytest(object):
     def anonymity_test(self, ip, proxy, protocol):
         # 匿名检测
         if protocol == "HTTP":
-            r = requests.get("http://ip.ddemo.xyz", headers=self.headers, proxies=proxy, timeout=10)
-            visit_ip = str(r.text).split(":")[0]
+            r = self.s.get("http://ip.chinaz.com/getip.aspx", headers=self.headers, proxies=proxy, timeout=10)
+            re_str = r"\d*\.\d*\.\d*\.\d*"
+            visit_ip = re.findall(re_str, r.text)
+            print visit_ip
             if visit_ip == ip:
                 return True
 
@@ -34,26 +39,25 @@ class proxytest(object):
         print "Test Http protocol"
         for i in self.allip[start:end]:
             ip = str(i[1])
-            port = str(i[0])
+            port = str(i[2])
             proxy = ip + ":" + port
             print threading.current_thread().getName() + " tesing: " + proxy
             proxy_setting = {
                 "http" : str("http://" + proxy)
             }
             try:
-                r = requests.get(self.urlhttp, headers=self.headers, proxies=proxy_setting, timeout=10)
+                r = self.s.get(self.urlhttp, headers=self.headers, proxies=proxy_setting, timeout=10)
                 statuscode = r.status_code
+                print r.status_code
                 if statuscode == 200:
                     print "True"
-                    if self.anonymity_test(proxy, proxy_setting, "HTTP"):
-                        print "High"
-                        db.insert_Proxy("Proxy_HTTP", ip, port, 1)
+                    db.insert_Proxy("Proxy_HTTP", ip, port, 1)
             except Exception as e:
-                # print e
+                print e
                 print "Error"
 
     def https_test(self, start, end):
-        # http协议测试
+        # https协议测试
         print "Test Https protocol"
         for i in self.allip[start:end]:
             ip = str(i[1])
@@ -64,12 +68,13 @@ class proxytest(object):
                 "http": str("https://" + proxy)
             }
             try:
-                r = requests.get(self.urlhttp, headers=self.headers, proxies=proxy_setting, timeout=10)
+                r = self.s.get(self.urlhttp, headers=self.headers, proxies=proxy_setting, timeout=10)
                 statuscode = r.status_code
                 if statuscode == 200:
                     print "True"
-                    if self.anonymity_test(proxy, proxy_setting, "HTTP"):
+                    if self.anonymity_test(proxy, proxy_setting, "HTTPS"):
                         print "High"
+                        db.insert_Proxy("Proxy_HTTPS", ip, port, 1)
             except Exception as e:
                 # print e
                 print "Error"
