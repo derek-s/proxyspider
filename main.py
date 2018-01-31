@@ -46,7 +46,7 @@ def spidermain():
 def proxy_test():
     test = proxytest()
     ip_list = test.ip_pool_list()
-    start_thread(6, ip_list)
+    start_thread(12, ip_list)
 
 
 def start_thread(num, iplist):
