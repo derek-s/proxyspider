@@ -35,14 +35,16 @@ class sqlite(object):
 
     def insert_Proxy(self, table, ip, port, point):
         self.c.execute(
-            'insert into ?(IP,Port,Point) VALUES(?,?,?)', (table, ip, port, point)
+            'insert into %s(IP,Port,Point) VALUES(?,?,?)' %(table), (ip, port, point)
         )
         self.commit()
 
     def selete_point(self, table, ip, port):
         self.c.execute(
-            'select Point from ? where ip = ? and port = ?', (table, ip, port,)
+            'select Point from %s where ip = ? and port = ?' %(table) , (ip, port,)
         )
+        point = self.c.fetchone()
+        return point
     def emtrypool(self):
         self.db.execute(
             "delete from IP_Pool"
