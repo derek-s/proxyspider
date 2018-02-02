@@ -13,6 +13,7 @@ parser = OptionParser()
 parser.add_option("-r", "--reload", action="store_true", dest="repp", help="empty ProxyPool table reload")
 parser.add_option("-s", "--spider", action="store_true", dest="sppool", help="spider ProxyPool")
 parser.add_option("-t", "--test", action="store_true", dest="test", help="Test Proxy")
+parser.add_option("-a", "--anonymity", action="store_true", dest="anonymity", help="Test Anonymity")
 opts, args = parser.parse_args()
 
 
@@ -59,7 +60,7 @@ def start_thread(num, iplist):
     ipaddr_length = len(iplist)
     part = ipaddr_length / num
     if ipaddr_length % num != 0:
-        last_part = part * 4 + ipaddr_length % num
+        last_part = part * num + ipaddr_length % num
 
     print len(iplist)
 
@@ -85,6 +86,39 @@ def start_thread(num, iplist):
         t.join()
 
 
+def Anonymity_thread(num, iplist, table):
+    """
+    Anonymity Test Func
+    :param num: Thread num
+    :param iplist: iplist
+    :return: None
+    """
+    testing = proxytest()
+    ipaddr_length = len(iplist)
+    part = ipaddr_length / num
+    if ipaddr_length % num != 0:
+        last_part = part * num + ipaddr_length % num
+    print len(iplist)
+    for i in range(num):
+        if i == 0:
+            start = 0
+            end = part
+        elif i > 0 and i != num -1 :
+            start = part * i + 1
+            end = part * (i + 1)
+        elif i == num - 1:
+            start = part * i + 1
+            end = last_part
+
+        t = threading.Thread(target=testing.anonymity_test, kwargs={'table':table, 'iplist':iplist, 'start':start, 'end':end})
+        t.setDaemon(True)
+        t.start()
+
+    main_thread = threading.current_thread()
+    for t in threading.enumerate():
+        if t is main_thread:
+            continue
+        t.join()
 
 if __name__ == "__main__":
     db = sqlite()
@@ -99,5 +133,10 @@ if __name__ == "__main__":
         spidermain()
     elif opts.test:
         proxy_test()
+    elif opts.anonymity:
+        if args[0] == 'http':
+            Anonymity_thread(12, db.http_pool(), "Proxy_HTTP")
+        elif args[0] == 'https':
+            print args[0]
     #proxy_test()
 
