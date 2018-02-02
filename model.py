@@ -41,10 +41,23 @@ class sqlite(object):
 
     def selete_point(self, table, ip, port):
         self.c.execute(
-            'select Point from %s where ip = ? and port = ?' %(table) , (ip, port,)
+            'select Point from %s where ip = ? and port = ?' %(table), (ip, port,)
         )
         point = self.c.fetchone()
         return point
+
+    def http_pool(self):
+        self.c.execute(
+            "select * from Proxy_HTTP"
+        )
+        return self.c.fetchall()
+
+    def https_pool(self):
+        self.c.execute(
+            "select * from Proxy_HTTPS"
+        )
+        return self.c.fetchall()
+
     def emtrypool(self):
         self.db.execute(
             "delete from IP_Pool"
@@ -53,7 +66,21 @@ class sqlite(object):
             'update sqlite_sequence set seq = 0 where name = "IP_Pool"'
         )
         self.commit()
+
+    def del_proxy(self, table, id):
+        self.db.execute(
+            "delete from %s where id = ?" %(table), (id,)
+        )
+        self.commit()
+
+    def update_point(self, table, id, point):
+        self.db.execute(
+            "update %s set Point = ? where ID = ?" %(table), (point, id,)
+        )
+        self.commit()
+
     def commit(self):
         self.db.commit()
+
     def closedb(self):
         self.c.close()
