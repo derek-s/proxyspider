@@ -18,7 +18,7 @@ class proxytest(object):
         self.allip = self.ip_pool_list()
         self.allhttp = self.http_pool_list()
         self.s = requests.session()
-
+        # self.s.keep_alive = False
 
     def ip_pool_list(self):
         # 获取IP池总表
@@ -29,7 +29,6 @@ class proxytest(object):
         # HTTP协议代理ip表
         http_pool = db.http_pool()
         return http_pool
-
 
     def anonymity_test(self, table, iplist, start, end):
         # 匿名检测
@@ -42,22 +41,32 @@ class proxytest(object):
             proxy_ip = ip + ":" + port
             proxy_setting = {
                 'http': proxy_ip,
-                'https:': proxy_ip
+                'https': proxy_ip
             }
             try:
-                r = self.s.get("http://ip.chinaz.com/getip.aspx", headers=self.headers, proxies=proxy_setting, timeout=5)
+                if table == "Proxy_HTTP":
+                    r = requests.get(
+                        "http://ip.chinaz.com/getip.aspx",
+                        headers=self.headers, proxies=proxy_setting, timeout=5)
+                elif table == "Proxy_HTTPS":
+                    r = requests.get(
+                        "https://pv.sohu.com/cityjson?ie=utf-8",
+                        headers=self.headers, proxies=proxy_setting, timeout=5)
+                print r.text
                 re_str = r"\d*\.\d*\.\d*\.\d*"
                 visit_ip = re.findall(re_str, r.text)
                 if visit_ip[0] == ip:
                     print proxy_ip + " True"
-                    point = db.selete_point('Proxy_HTTP', ip, port)[0] + 1
+                    point += 1
                     print point
                     db.update_point(table, id, point)
                 else:
                     db.del_proxy(table, id)
+                r.close()
             except Exception as e:
                 print proxy_ip + " Error"
-
+                r.close()
+                #print e
 
     def http_test(self, start, end):
         # http协议测试
@@ -75,33 +84,36 @@ class proxytest(object):
                 "https": str(proxy)
             }
             try:
-                r = self.s.get(self.urlhttp, headers=self.headers, proxies=proxy_setting_http, timeout=10)
+                r = requests.get(self.urlhttp, headers=self.headers, proxies=proxy_setting_http, timeout=5)
                 statuscode = r.status_code
                 print r.status_code
                 if statuscode == 200:
                     print "True"
-                    point = db.selete_point('Proxy_HTTP', ip, port)
+                    point = db.selete_point('Proxy_HTTP', ip, port)[0]
                     print point
                     if point is None:
                         db.insert_Proxy("Proxy_HTTP", ip, port, 1)
                     else:
                         db.insert_Proxy("Proxy_HTTP", ip, port, (point + 1))
+                r.close()
             except Exception as e:
-                #print e
+                # print e
                 print "Error"
                 try:
-                    r = self.s.get(self.urlhttps, headers=self.headers, proxies=proxy_setting_https, timeout=10)
+                    r = requests.get(self.urlhttps, headers=self.headers, proxies=proxy_setting_https, timeout=5)
                     statuscode = r.status_code
                     print r.status_code
                     if statuscode == 200:
                         print "True"
-                        point = db.selete_point('Proxy_HTTPS', ip, port)
+                        point = db.selete_point('Proxy_HTTPS', ip, port)[0]
                         print point
                         if point is None:
                             db.insert_Proxy("Proxy_HTTPS", ip, port, 1)
                         else:
                             db.insert_Proxy("Proxy_HTTPS", ip, port, (point + 1))
+                    r.close()
                 except Exception as e:
-                    #print e
+                    r.close()
+                    # print e
                     print "Error"
         db.closedb()
