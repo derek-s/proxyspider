@@ -47,7 +47,7 @@ def spidermain():
 def proxy_test():
     test = proxytest()
     ip_list = test.ip_pool_list()
-    start_thread(12, ip_list)
+    start_thread(8, ip_list)
 
 
 def start_thread(num, iplist):
@@ -61,6 +61,8 @@ def start_thread(num, iplist):
     part = ipaddr_length / num
     if ipaddr_length % num != 0:
         last_part = part * num + ipaddr_length % num
+    else:
+        last_part = ipaddr_length
 
     print len(iplist)
 
@@ -137,6 +139,6 @@ if __name__ == "__main__":
         if args[0] == 'http':
             Anonymity_thread(12, db.http_pool(), "Proxy_HTTP")
         elif args[0] == 'https':
-            print args[0]
+            Anonymity_thread(12, db.https_pool(), "Proxy_HTTPS")
     #proxy_test()
 
