@@ -359,4 +359,3 @@ class xdailicn():
             port = x["port"]
             print ipaddr, port
             db.insertdb(ipaddr, port)
-
