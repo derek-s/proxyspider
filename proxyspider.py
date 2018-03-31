@@ -23,7 +23,6 @@ class request():
         while fails < 31:
             try:
                 request = requests.get(url, headers=headers, verify=self.verify, timeout=self.timeout)
-                print(request.text)
                 return request.text
             except Exception as e:
                 print e
