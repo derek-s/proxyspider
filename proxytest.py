@@ -11,8 +11,6 @@ import string
 
 db = sqlite()
 
-
-
 class proxytest(object):
     def __init__(self):
         self.headers = {
@@ -35,14 +33,28 @@ class proxytest(object):
 
     def connectTest(self, start_part, end_part):
         """
-        ping连通性测试
+        连通性测试
         :return:
         """
+        db_thread = sqlite()
+        httpbin_url = "http://httpbin.org/ip"
+        httpsbin_url = "https://httpbin.org/ip"
+        headers = {
+            'User_Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:59.0) Gecko/20100101 Firefox/5"
+        }
         for proxy_one in self.allip[start_part:end_part]:
+            # basic info
             id = proxy_one[0]
             ip = str(proxy_one[1])
             port = str(proxy_one[2])
-            ping_test = "ping -c 5 -w 1 %s" % (ip)
+            proxy = ip + ":" + port
+            proxy_setting = {
+                'http': proxy,
+                'https': proxy
+            }
+
+            # ping test
+            ping_test = "ping -c 5 -w 2 %s" % (ip)
             subp = subprocess.Popen(
                 ping_test,
                 stdin=subprocess.PIPE,
@@ -54,7 +66,8 @@ class proxytest(object):
             ping_result = subp.stdout.read()
             ping_regex = re.findall("100% packet loss", ping_result)
             if len(ping_regex) == 0:
-                nc_test = "nc -z -w3 -nvv %s %s" % (ip, port)
+                # netcat test
+                nc_test = "nc -z -w 2 -nvv %s %s" % (ip, port)
                 subnc = subprocess.Popen(
                     nc_test,
                     stdin=subprocess.PIPE,
@@ -66,10 +79,44 @@ class proxytest(object):
                 nc_success = re.findall("succeeded", nc_result)
                 nc_open = re.findall("open", nc_result)
                 if len(nc_success) != 0 or len(nc_open) != 0:
-                    print(str(ip) + " up")
+                    try:
+                        print(str(ip) + " UP Test Web visit")
+                        print(str(ip) + " Test http")
+                        http_r = requests.get(httpbin_url, proxies=proxy_setting, timeout=2)
+                        http_r_status = http_r.status_code
+                        if http_r_status == 200:
+                            remote_ip = http_r.json()['origin']
+                            if remote_ip == ip:
+                                print("high anonymity")
+                                point = db_thread.selete_point('Proxy_HTTP', ip, port)
+                                if point is None:
+                                    db_thread.insert_Proxy("Proxy_HTTP", ip, port, 5)
+                            else:
+                                print(remote_ip)
+                        else:
+                            print(http_r_status)
+                    except Exception as e:
+                        print e
+                        print(str(ip) + " http connection fail")
+                    try:
+                        print(str(ip) + " Test https")
+                        https_r = requests.get(httpsbin_url, proxies=proxy_setting, timeout=2)
+                        https_r_status = https_r.status_code
+                        if https_r_status == 200:
+                            remote_ip = https_r.json()['origin']
+                            if remote_ip == ip:
+                                print("high anonymity")
+                                point = db_thread.selete_point('Proxy_HTTPS', ip, port)
+                                if point is None:
+                                    db_thread.insert_Proxy("Proxy_HTTPS", ip, port, 5)
+                            else:
+                                print(remote_ip)
+                        else:
+                            print(https_r_status)
+                    except:
+                        print(str(ip) + " https connection fail")
                 else:
-                    pass
-                    #print(str(ip) + "down")
+                    print(str(ip) + " down")
             else:
-                pass
-                #print("down")
+                print(str(ip) + " down")
+        db_thread.closedb()
