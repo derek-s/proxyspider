@@ -23,6 +23,7 @@ class request():
         while fails < 31:
             try:
                 request = requests.get(url, headers=headers, verify=self.verify, timeout=self.timeout)
+                request.close()
                 return request.text
             except Exception as e:
                 print e
@@ -42,7 +43,7 @@ class kuaidaili():
     def inhaproxyre(self):
         print "process kuaidaili.com"
         getHtml = request()
-        for page in range(1, 5):
+        for page in range(1, 10):
             url = "https://www.kuaidaili.com/free/inha/" + str(page)
             pagescode = getHtml.r(url, self.headers)
             soup = BeautifulSoup(pagescode, "html.parser")
@@ -71,7 +72,7 @@ class xici():
         print "process xicidaili"
         getHtml = request()
         print(getHtml)
-        for page in range(1, 5):
+        for page in range(1, 10):
             url = "http://www.xicidaili.com/nn/" + str(page)
             pagescode = getHtml.r(url, self.headers)
             soup = BeautifulSoup(pagescode, "html.parser")

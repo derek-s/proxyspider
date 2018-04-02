@@ -102,7 +102,8 @@ class proxytest(object):
                 'http': proxy,
                 'https': proxy
             }
-
+            http_result = ""
+            https_result = ""
             if self.ping_test(ip):
                 if self.nc_test(ip, port):
                     try:
@@ -121,14 +122,21 @@ class proxytest(object):
                                 print(remote_ip)
                         else:
                             print(http_r_status)
+                        print("close")
+                        http_result.raw.close()
                     except Exception as e:
                         print(str(ip) + " http connection fail")
+                    finally:
+                        if http_result:
+                            http_result.raw.close()
+                        else:
+                            pass
                     try:
                         print(str(ip) + " Test https")
-                        https_r = self.requers_conn(httpsbin_url, proxy_setting)
-                        https_r_status = https_r.status_code
-                        if https_r_status == 200:
-                            remote_ip = https_r.json()['origin']
+                        https_result = self.requers_conn(httpsbin_url, proxy_setting)
+                        https_result_status = https_result.status_code
+                        if https_result_status == 200:
+                            remote_ip = https_result.json()['origin']
                             if remote_ip == ip:
                                 print("high anonymity")
                                 point = db_thread.selete_point('Proxy_HTTPS', ip, port)
@@ -137,9 +145,16 @@ class proxytest(object):
                             else:
                                 print(remote_ip)
                         else:
-                            print(https_r_status)
+                            print(https_result_status)
+                        print("close")
+                        https_result.raw.close()
                     except:
                         print(str(ip) + " https connection fail")
+                    finally:
+                        if https_result:
+                            https_result.raw.close()
+                        else:
+                            pass
                 else:
                     print(str(ip) + " down")
             else:
@@ -157,8 +172,10 @@ class proxytest(object):
         db_avatest = sqlite()
         httpbin_url = "http://httpbin.org/ip"
         httpsbin_url = "https://httpbin.org/ip"
-
+        http_result = ""
+        https_result = ""
         if table == "http":
+
             table_name = "Proxy_HTTP"
             http_ip_list = db_avatest.http_pool()
             for each_ip in http_ip_list[start_part:end_part]:
@@ -188,8 +205,14 @@ class proxytest(object):
                                 print("now point %s" % str(point))
                                 point -= 1
                                 db_avatest.update_point(table_name, id, str(point))
+                            http_result.raw.close()
                         except Exception as e:
                             print(str(ip) + " http connection fail")
+                        finally:
+                            if http_result:
+                                http_result.raw.close()
+                            else:
+                                pass
                     else:
                         print(str(ip) + " down")
                         point -= 1
@@ -229,8 +252,14 @@ class proxytest(object):
                                 print("now point %s" % str(point))
                                 point -= 1
                                 db_avatest.update_point(table_name, id, point)
+                            https_result.close()
                         except Exception as e:
                             print(str(ip) + " https connection fail")
+                        finally:
+                            if https_result:
+                                https_result.raw.close()
+                            else:
+                                pass
                     else:
                         print(str(ip) + " down")
                         point -= 1
