@@ -137,6 +137,6 @@ class sqlite(object):
 
     def update_Failed(self, table, id, failednum):
         self.db.execute(
-            "update %s set Failed = ? where ID = ?" %(table), (id, failednum)
+            "update %s set Failed = ? where ID = ?" %(table), (failednum, id)
         )
         self.commit()
