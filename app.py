@@ -5,7 +5,7 @@
 # @Site    : 
 # @File    : app.py
 
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask import render_template
 import jinja2
@@ -41,15 +41,64 @@ class httpproxy_db(db.Model):
         self.Point = Point
 
 
+class httpsproxy_db(db.Model):
+    __tablename__  = "Proxy_HTTPS"
+    ID = db.Column("ID", db.Integer, primary_key=True)
+    IP = db.Column("IP", db.TEXT)
+    Port = db.Column("Port", db.TEXT)
+    Point = db.Column("Point", db.TEXT)
+
+    def __init__(self, ID, IP, Port, Point):
+        self.ID = ID
+        self.IP = IP
+        self.Port = Port
+        self.Point = Point
+
+
 
 @app.route("/")
 def index():
-    count = httpproxy_db.query.count()
-    return render_template("index.html")
+    count_http = httpproxy_db.query.count()
+    count_https = httpsproxy_db.query.count()
+    return render_template("index.html", count_http=count_http, count_https=count_https)
 
 @app.route("/http")
 def http_proxy():
-    pass
+    count = request.args.get("count", 0, type=int)
+    if count == 0:
+        off_set = 20
+    else:
+        off_set = count
+    print(count)
+    http_proxy_list = httpproxy_db.query.limit(off_set).all()
+    proxy_json = []
+    for proxy in http_proxy_list:
+        proxy_dict = {
+            'ip':proxy.IP,
+            'port':proxy.Port
+        }
+        proxy_json.append(proxy_dict)
+
+    return jsonify(proxy_json)
+
+@app.route("/https")
+def https_proxy():
+    count = request.args.get("count", 0, type=int)
+    if count == 0:
+        off_set = 20
+    else:
+        off_set = count
+    print(count)
+    https_proxy_list = httpsproxy_db.query.limit(off_set).all()
+    proxy_json = []
+    for proxy in https_proxy_list:
+        proxy_dict = {
+            'ip':proxy.IP,
+            'port':proxy.Port
+        }
+        proxy_json.append(proxy_dict)
+
+    return jsonify(proxy_json)
 
 
 if __name__ == '__main__':
