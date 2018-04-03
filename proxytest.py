@@ -175,7 +175,6 @@ class proxytest(object):
         http_result = ""
         https_result = ""
         if table == "http":
-
             table_name = "Proxy_HTTP"
             http_ip_list = db_avatest.http_pool()
             for each_ip in http_ip_list[start_part:end_part]:
@@ -183,7 +182,10 @@ class proxytest(object):
                 ip = str(each_ip[1])
                 port = str(each_ip[2])
                 point = int(each_ip[3])
+                failed = int(each_ip[4])
                 if point == 0:
+                    db_avatest.del_proxy(table_name, id)
+                if failed == 3:
                     db_avatest.del_proxy(table_name, id)
                 proxy = ip + ":" + port
                 proxy_setting = {
@@ -200,11 +202,13 @@ class proxytest(object):
                             if http_r_status == 200:
                                print("now point %s" % str(point))
                                point += 1
-                               db_avatest.update_point(table_name, id, str(point))
+                               db_avatest.update_point(table_name, id, point)
                             else:
                                 print("now point %s" % str(point))
                                 point -= 1
-                                db_avatest.update_point(table_name, id, str(point))
+                                db_avatest.update_point(table_name, id, point)
+                                failed += 1
+                                db_avatest.update_Failed(table_name, id, failed)
                             http_result.raw.close()
                         except Exception as e:
                             print(str(ip) + " http connection fail")
@@ -216,11 +220,15 @@ class proxytest(object):
                     else:
                         print(str(ip) + " down")
                         point -= 1
-                        db_avatest.update_point(table_name, id, str(point))
+                        db_avatest.update_point(table_name, id, point)
+                        failed += 1
+                        db_avatest.update_Failed(table_name, id, failed)
                 else:
                     print(str(ip) + " down")
                     point -= 1
-                    db_avatest.update_point(table_name, id, str(point))
+                    db_avatest.update_point(table_name, id, point)
+                    failed += 1
+                    db_avatest.update_Failed(table_name, id, failed)
 
         elif table == "https":
             table_name = "Proxy_HTTPS"
@@ -230,7 +238,10 @@ class proxytest(object):
                 ip = str(each_ip[1])
                 port = str(each_ip[2])
                 point = int(each_ip[3])
+                failed = int(each_ip[4])
                 if point == 0:
+                    db_avatest.del_proxy(table_name, id)
+                if failed == 3:
                     db_avatest.del_proxy(table_name, id)
                 proxy = ip + ":" + port
                 proxy_setting = {
@@ -252,6 +263,8 @@ class proxytest(object):
                                 print("now point %s" % str(point))
                                 point -= 1
                                 db_avatest.update_point(table_name, id, point)
+                                failed += 1
+                                db_avatest.update_Failed(table_name, id, failed)
                             https_result.close()
                         except Exception as e:
                             print(str(ip) + " https connection fail")
@@ -264,8 +277,12 @@ class proxytest(object):
                         print(str(ip) + " down")
                         point -= 1
                         db_avatest.update_point(table_name, id, str(point))
+                        failed += 1
+                        db_avatest.update_Failed(table_name, id, failed)
                 else:
                     print(str(ip) + " down")
                     point -= 1
                     db_avatest.update_point(table_name, id, str(point))
+                    failed += 1
+                    db_avatest.update_Failed(table_name, id, failed)
         db_avatest.closedb()
