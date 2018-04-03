@@ -53,7 +53,7 @@ class sqlite(object):
         :return:
         """
         self.c.execute(
-            'insert into %s(IP,Port,Point) VALUES(?,?,?)' %(table), (ip, port, point)
+            'insert into %s(IP,Port,Point,Failed) VALUES(?,?,?,?)' %(table), (ip, port, point, 0)
         )
         self.commit()
 
@@ -134,3 +134,8 @@ class sqlite(object):
 
     def closedb(self):
         self.c.close()
+
+    def update_Failed(self, table, id, failednum):
+        self.db.execute(
+            "update %s set Failed = ? where ID = ?" %(table), (id, failednum)
+        )
