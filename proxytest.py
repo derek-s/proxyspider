@@ -8,6 +8,7 @@ import re
 import httplib
 import subprocess
 import string
+from queue_db import q
 
 db = sqlite()
 
@@ -117,7 +118,14 @@ class proxytest(object):
                                 print("high anonymity")
                                 point = db_thread.selete_point('Proxy_HTTP', ip, port)
                                 if point is None:
-                                    db_thread.insert_Proxy("Proxy_HTTP", ip, port, 5)
+                                    db_table_info = {
+                                        'table_name': "Proxy_HTTP",
+                                        'ip': ip,
+                                        'port': port,
+                                        'point': 5
+                                    }
+                                    q.put(("insert_Proxy", db_table_info))
+                                    # db_thread.insert_Proxy("Proxy_HTTP", ip, port, 5)
                             else:
                                 print(remote_ip)
                         else:
@@ -141,7 +149,16 @@ class proxytest(object):
                                 print("high anonymity")
                                 point = db_thread.selete_point('Proxy_HTTPS', ip, port)
                                 if point is None:
-                                    db_thread.insert_Proxy("Proxy_HTTPS", ip, port, 5)
+                                    db_table_info = {
+                                        'table_name': "Proxy_HTTP",
+                                        'ip': ip,
+                                        'port': port,
+                                        'point': 5
+                                    }
+                                    q.put(("insert_Proxy", db_table_info))
+                                    # db_thread.insert_Proxy("Proxy_HTTPS", ip, port, 5)
+                                else:
+                                    print(str(ip) + " already exist")
                             else:
                                 print(remote_ip)
                         else:
@@ -159,6 +176,8 @@ class proxytest(object):
                     print(str(ip) + " down")
             else:
                 print(str(ip) + " down")
+        if threading.activeCount() <= 3:
+            q.put("over")
         db_thread.closedb()
 
     def availability_test(self, table, start_part, end_part):
@@ -184,9 +203,19 @@ class proxytest(object):
                 point = int(each_ip[3])
                 failed = int(each_ip[4])
                 if point == 0:
-                    db_avatest.del_proxy(table_name, id)
-                if failed == 3:
-                    db_avatest.del_proxy(table_name, id)
+                    db_table_info = {
+                        'table_name': table_name,
+                        'id': id
+                    }
+                    q.put(("del_proxy", db_table_info))
+                    # db_avatest.del_proxy(table_name, id)
+                if failed >= 3:
+                    db_table_info = {
+                        'table_name': table_name,
+                        'id': id
+                    }
+                    q.put(("del_proxy", db_table_info))
+                    # db_avatest.del_proxy(table_name, id)
                 proxy = ip + ":" + port
                 proxy_setting = {
                     'http': proxy,
@@ -202,15 +231,39 @@ class proxytest(object):
                             if http_r_status == 200:
                                print("now point %s" % str(point))
                                point += 1
-                               db_avatest.update_point(table_name, id, point)
+                               db_table_info = {
+                                   'table_name': table_name,
+                                   'id': id,
+                                   'point': point
+                               }
+                               q.put(("update_point", db_table_info))
+                               # db_avatest.update_point(table_name, id, point)
                             else:
                                 print("now point %s" % str(point))
                                 point -= 1
-                                db_avatest.update_point(table_name, id, point)
+                                db_table_info = {
+                                    'table_name': table_name,
+                                    'id': id,
+                                    'point': point
+                                }
+                                q.put(("update_point", db_table_info))
+                                #db_avatest.update_point(table_name, id, point)
                                 failed += 1
-                                db_avatest.update_Failed(table_name, id, failed)
+                                db_table_info = {
+                                    'table_name': table_name,
+                                    'id': id,
+                                    'failed': failed
+                                }
+                                q.put(("update_Failed", db_table_info))
+                                # db_avatest.update_Failed(table_name, id, failed)
                             http_result.raw.close()
                         except Exception as e:
+                            db_table_info = {
+                                'table_name': table_name,
+                                'id': id,
+                                'point': point
+                            }
+                            q.put(("update_point", db_table_info))
                             print(str(ip) + " http connection fail")
                         finally:
                             if http_result:
@@ -220,15 +273,39 @@ class proxytest(object):
                     else:
                         print(str(ip) + " down")
                         point -= 1
-                        db_avatest.update_point(table_name, id, point)
+                        db_table_info = {
+                            'table_name': table_name,
+                            'id': id,
+                            'point': point
+                        }
+                        q.put(("update_point", db_table_info))
+                        # db_avatest.update_point(table_name, id, point)
                         failed += 1
-                        db_avatest.update_Failed(table_name, id, failed)
+                        db_table_info = {
+                            'table_name': table_name,
+                            'id': id,
+                            'failed': failed
+                        }
+                        q.put(("update_Failed", db_table_info))
+                        # db_avatest.update_Failed(table_name, id, failed)
                 else:
                     print(str(ip) + " down")
                     point -= 1
-                    db_avatest.update_point(table_name, id, point)
+                    db_table_info = {
+                        'table_name': table_name,
+                        'id': id,
+                        'point': point
+                    }
+                    q.put(("update_point", db_table_info))
+                    # db_avatest.update_point(table_name, id, point)
                     failed += 1
-                    db_avatest.update_Failed(table_name, id, failed)
+                    db_table_info = {
+                        'table_name': table_name,
+                        'id': id,
+                        'failed': failed
+                    }
+                    q.put(("update_Failed", db_table_info))
+                    # db_avatest.update_Failed(table_name, id, failed)
 
         elif table == "https":
             table_name = "Proxy_HTTPS"
@@ -240,9 +317,19 @@ class proxytest(object):
                 point = int(each_ip[3])
                 failed = int(each_ip[4])
                 if point == 0:
-                    db_avatest.del_proxy(table_name, id)
-                if failed == 3:
-                    db_avatest.del_proxy(table_name, id)
+                    db_table_info = {
+                        'table_name': table_name,
+                        'id': id
+                    }
+                    q.put(("del_proxy", db_table_info))
+                    # db_avatest.del_proxy(table_name, id)
+                if failed >= 3:
+                    db_table_info = {
+                        'table_name': table_name,
+                        'id': id
+                    }
+                    q.put(("del_proxy", db_table_info))
+                    # db_avatest.del_proxy(table_name, id)
                 proxy = ip + ":" + port
                 proxy_setting = {
                     'http': proxy,
@@ -258,15 +345,39 @@ class proxytest(object):
                             if https_r_status == 200:
                                print("now point %s" % str(point))
                                point += 1
-                               db_avatest.update_point(table_name, id, point)
+                               db_table_info = {
+                                   'table_name': table_name,
+                                   'id': id,
+                                   'point': point
+                               }
+                               q.put(("update_point", db_table_info))
+                               # db_avatest.update_point(table_name, id, point)
                             else:
                                 print("now point %s" % str(point))
                                 point -= 1
-                                db_avatest.update_point(table_name, id, point)
+                                db_table_info = {
+                                    'table_name': table_name,
+                                    'id': id,
+                                    'point': point
+                                }
+                                q.put(("update_point", db_table_info))
+                                #db_avatest.update_point(table_name, id, point)
                                 failed += 1
-                                db_avatest.update_Failed(table_name, id, failed)
+                                db_table_info = {
+                                    'table_name': table_name,
+                                    'id': id,
+                                    'failed': failed
+                                }
+                                q.put(("update_Failed", db_table_info))
+                                # db_avatest.update_Failed(table_name, id, failed)
                             https_result.close()
                         except Exception as e:
+                            db_table_info = {
+                                'table_name': table_name,
+                                'id': id,
+                                'point': point
+                            }
+                            q.put(("update_point", db_table_info))
                             print(str(ip) + " https connection fail")
                         finally:
                             if https_result:
@@ -276,13 +387,39 @@ class proxytest(object):
                     else:
                         print(str(ip) + " down")
                         point -= 1
-                        db_avatest.update_point(table_name, id, str(point))
+                        db_table_info = {
+                            'table_name': table_name,
+                            'id': id,
+                            'point': point
+                        }
+                        q.put(("update_point", db_table_info))
+                        # db_avatest.update_point(table_name, id, point)
                         failed += 1
-                        db_avatest.update_Failed(table_name, id, failed)
+                        db_table_info = {
+                            'table_name': table_name,
+                            'id': id,
+                            'failed': failed
+                        }
+                        q.put(("update_Failed", db_table_info))
+                        # db_avatest.update_Failed(table_name, id, failed)
                 else:
                     print(str(ip) + " down")
                     point -= 1
-                    db_avatest.update_point(table_name, id, str(point))
+                    db_table_info = {
+                        'table_name': table_name,
+                        'id': id,
+                        'point': point
+                    }
+                    q.put(("update_point", db_table_info))
+                    # db_avatest.update_point(table_name, id, point)
                     failed += 1
-                    db_avatest.update_Failed(table_name, id, failed)
+                    db_table_info = {
+                        'table_name': table_name,
+                        'id': id,
+                        'failed': failed
+                    }
+                    q.put(("update_Failed", db_table_info))
+                    # db_avatest.update_Failed(table_name, id, failed)
+        if threading.activeCount() <= 3:
+            q.put("over")
         db_avatest.closedb()
