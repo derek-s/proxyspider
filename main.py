@@ -5,8 +5,8 @@ from proxyspider import kuaidaili, xici, cn66, ip89cn
 from proxyspider import ip3366, data5u, coderbusy, horocn
 from proxytest import proxytest
 import threading
-import Queue
 from optparse import OptionParser
+from queue_db import queue_db
 from model import sqlite
 
 
@@ -18,8 +18,8 @@ parser.add_option("-t", "--test", action="store_true", dest="test", help="Test P
 parser.add_option("-a", "--availability", action="store_true", dest="availability", help="Test availability")
 opts, args = parser.parse_args()
 
-
 thread_quantity = 8
+
 
 def spidermain():
     """
@@ -52,6 +52,7 @@ def ip_pool_test():
     ip_pool表测试
     :return: None
     """
+    db_t = queue_db()
     proxt_test = proxytest()
     ip_pool_count = len(proxt_test.ip_pool_list()) # 获取ip_pool表内数据总量
     # 开启的线程数量
@@ -81,7 +82,7 @@ def ip_pool_test():
             )
         each_thread.setDaemon(True)
         each_thread.start()
-
+    db_t.start()
     # 主线程等待
     main_thread = threading.current_thread()
     for t in threading.enumerate():
@@ -95,6 +96,7 @@ def usability_test_http(protocol):
     可用性测试
     :return: None
     """
+    db_t = queue_db()
     ava_test = proxytest()
     print("http availability testing")
     if protocol == "http":
@@ -125,18 +127,20 @@ def usability_test_http(protocol):
             )
             each_thread.setDaemon(True)
             each_thread.start()
-
+        db_t.start()
         main_thread = threading.current_thread()
         for t in threading.enumerate():
             if t is main_thread:
                 continue
             t.join()
 
+
 def usability_test_https(protocol):
     """
     可用性测试
     :return: None
     """
+    db_t = queue_db()
     ava_test = proxytest()
     print("https availability testing")
     if protocol == "https":
@@ -167,13 +171,12 @@ def usability_test_https(protocol):
             )
             each_thread.setDaemon(True)
             each_thread.start()
-
+        db_t.start()
         main_thread = threading.current_thread()
         for t in threading.enumerate():
             if t is main_thread:
                 continue
             t.join()
-
 
 
 if __name__ == "__main__":
