@@ -28,7 +28,7 @@ class proxytest(object):
         :return:
         """
         # ping test
-        ping_test = "ping -c 5 -w 2 %s" % (ip)
+        ping_test = "ping -c 5 -w 3 %s" % (ip)
         subp = subprocess.Popen(
             ping_test,
             stdin=subprocess.PIPE,
@@ -50,7 +50,7 @@ class proxytest(object):
         :param port:
         :return:
         """
-        nc_test = "nc -z -w 2 -nvv %s %s" % (ip, port)
+        nc_test = "nc -z -w 3 -nvv %s %s" % (ip, port)
         subnc = subprocess.Popen(
             nc_test,
             stdin=subprocess.PIPE,
@@ -209,7 +209,7 @@ class proxytest(object):
                     }
                     q.put(("del_proxy", db_table_info))
                     # db_avatest.del_proxy(table_name, id)
-                if failed >= 3:
+                if failed >= 10:
                     db_table_info = {
                         'table_name': table_name,
                         'id': id
@@ -229,15 +229,16 @@ class proxytest(object):
                             http_result = self.requers_conn(httpbin_url, proxy_setting)
                             http_r_status = http_result.status_code
                             if http_r_status == 200:
-                               print("now point %s" % str(point))
-                               point += 1
-                               db_table_info = {
-                                   'table_name': table_name,
-                                   'id': id,
-                                   'point': point
-                               }
-                               q.put(("update_point", db_table_info))
-                               # db_avatest.update_point(table_name, id, point)
+                                http_result.json()['']
+                                print("now point %s" % str(point))
+                                point += 1
+                                db_table_info = {
+                                    'table_name': table_name,
+                                    'id': id,
+                                    'point': point
+                                }
+                                q.put(("update_point", db_table_info))
+                                # db_avatest.update_point(table_name, id, point)
                             else:
                                 print("now point %s" % str(point))
                                 point -= 1
@@ -258,6 +259,8 @@ class proxytest(object):
                                 # db_avatest.update_Failed(table_name, id, failed)
                             http_result.raw.close()
                         except Exception as e:
+                            pass
+                            """
                             db_table_info = {
                                 'table_name': table_name,
                                 'id': id,
@@ -265,6 +268,7 @@ class proxytest(object):
                             }
                             q.put(("update_point", db_table_info))
                             print(str(ip) + " http connection fail")
+                            """
                         finally:
                             if http_result:
                                 http_result.raw.close()
@@ -323,7 +327,7 @@ class proxytest(object):
                     }
                     q.put(("del_proxy", db_table_info))
                     # db_avatest.del_proxy(table_name, id)
-                if failed >= 3:
+                if failed >= 10:
                     db_table_info = {
                         'table_name': table_name,
                         'id': id
@@ -372,6 +376,8 @@ class proxytest(object):
                                 # db_avatest.update_Failed(table_name, id, failed)
                             https_result.close()
                         except Exception as e:
+                            pass
+                            """
                             db_table_info = {
                                 'table_name': table_name,
                                 'id': id,
@@ -379,6 +385,7 @@ class proxytest(object):
                             }
                             q.put(("update_point", db_table_info))
                             print(str(ip) + " https connection fail")
+                            """
                         finally:
                             if https_result:
                                 https_result.raw.close()
