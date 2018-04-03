@@ -139,3 +139,4 @@ class sqlite(object):
         self.db.execute(
             "update %s set Failed = ? where ID = ?" %(table), (id, failednum)
         )
+        self.commit()
