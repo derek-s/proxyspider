@@ -24,6 +24,16 @@
 	p {
 		font-size: 14px
 	}
+	p.proxytitle {
+		line-height: 40px;
+	}
+	p.count {
+		color:red;
+		font-weight: bold;
+	}
+	p.inline{
+		display: inline;
+	}
 	.proxyhref {
 		font-weight: bold;
 	}
@@ -39,8 +49,14 @@
 	<p class="pagedesc">代理池内代理从若干免费代理平台抓取，测试并持久化，返回可用度高代理，支持HTTP/HTTPS协议。</p>
 	<h2 class="pagetitle">路径点</h1>
 	<div class="endpoint">
-		<p class="proxytitle"><a class="proxyhref" href="/http">/http</a> 获取HTTP协议代理</p>
-		<p class="proxytitle"><a class="proxyhref" href="/https">/https</a> 获取HTTPS协议代理</p>
+		<div style="display: block">
+			<p class="proxytitle inline"><a class="proxyhref" href="/http">/http</a> 获取HTTP协议代理 当前总量：</p>
+			<p class="proxytitle count inline">{{ count_http }}</p>
+		</div>
+		<div style="display: block">
+			<p class="proxytitle inline"><a class="proxyhref" href="/https">/https</a> 获取HTTPS协议代理 当前总量：</p>
+			<p class="proxytitle count inline">{{ count_https }}</p>
+		</div>
 	</div>
 </body>
 </html>
