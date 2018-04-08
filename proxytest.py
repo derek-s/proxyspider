@@ -209,13 +209,13 @@ class proxytest(object):
                     }
                     q.put(("del_proxy", db_table_info))
                     # db_avatest.del_proxy(table_name, id)
-                if failed >= 10:
+                if failed >= 5:
                     db_table_info = {
                         'table_name': table_name,
                         'id': id
                     }
                     q.put(("del_proxy", db_table_info))
-                    # db_avatest.del_proxy(table_name, id)
+                    db_avatest.del_proxy(table_name, id)
                 proxy = ip + ":" + port
                 proxy_setting = {
                     'http': proxy,
@@ -327,13 +327,13 @@ class proxytest(object):
                     }
                     q.put(("del_proxy", db_table_info))
                     # db_avatest.del_proxy(table_name, id)
-                if failed >= 10:
+                if failed >= 5:
                     db_table_info = {
                         'table_name': table_name,
                         'id': id
                     }
                     q.put(("del_proxy", db_table_info))
-                    # db_avatest.del_proxy(table_name, id)
+                    db_avatest.del_proxy(table_name, id)
                 proxy = ip + ":" + port
                 proxy_setting = {
                     'http': proxy,
