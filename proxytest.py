@@ -28,7 +28,7 @@ class proxytest(object):
         :return:
         """
         # ping test
-        ping_test = "ping -c 5 -w 3 %s" % (ip)
+        ping_test = "ping -c 5 -W 3 %s" % (ip)
         subp = subprocess.Popen(
             ping_test,
             stdin=subprocess.PIPE,
