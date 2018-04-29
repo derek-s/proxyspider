@@ -21,7 +21,6 @@ def queue_db():
         print e
 
 
-
 def db_process():
     db = sqlite()
     while_Falg = True
